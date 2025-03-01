@@ -80,7 +80,7 @@ class ReportObserver
                 $admins = User::role('Administrator')->get(); // Ambil semua admin
 
                 Notification::make()
-                    ->title('{username} Memperbarui Laporan')
+                    ->title("{$userName} Memperbarui Laporan")
                     ->info()
                     ->body("{$userName} telah memperbarui laporan \"{$report->title}\", dari pengajuan permohonan perubahan yang disetujui sebelumnya.")
                     ->sendToDatabase($admins);
