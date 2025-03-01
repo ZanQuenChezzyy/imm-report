@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('title', 45);
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('status')->default(0)->length(1);
-            $table->string('file_name', 100);
             $table->string('file_path', 100);
             $table->timestamps();
         });

@@ -15,7 +15,6 @@ class Report extends Model
         'title',
         'description',
         'status',
-        'file_name',
         'file_path',
     ];
 

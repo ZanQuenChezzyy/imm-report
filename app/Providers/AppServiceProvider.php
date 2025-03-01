@@ -8,7 +8,9 @@ use App\Filament\Resources\PermissionResource;
 use App\Filament\Resources\RoleResource;
 use App\Filament\Resources\UserResource;
 use App\Models\Permission;
+use App\Models\Report;
 use App\Observers\PermissionObserver;
+use App\Observers\ReportObserver;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
@@ -55,5 +57,7 @@ class AppServiceProvider extends ServiceProvider
                 PermissionResource::class,
             ]
         );
+
+        Report::observe(ReportObserver::class);
     }
 }
