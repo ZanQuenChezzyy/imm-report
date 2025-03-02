@@ -13,7 +13,9 @@ class ManageProjects extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Tambah Proyek')
+                ->icon('heroicon-m-plus-circle'),
         ];
     }
 }

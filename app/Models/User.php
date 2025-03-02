@@ -67,7 +67,6 @@ class User extends Authenticatable implements HasAvatar
         return $this->hasMany(\App\Models\Report::class);
     }
 
-
     public function progressRealtimes(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Models\ProgressRealtime::class);

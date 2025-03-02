@@ -7,6 +7,7 @@ use App\Filament\Resources\ReportResource\RelationManagers;
 use App\Models\Report;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -24,6 +25,9 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action as NotificationAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 
 class ReportResource extends Resource
 {
@@ -50,7 +54,7 @@ class ReportResource extends Resource
             ->schema([
                 Section::make('Informasi Laporan')
                     ->schema([
-                        Forms\Components\Select::make('project_id')
+                        Select::make('project_id')
                             ->label('Proyek')
                             ->placeholder('Pilih Proyek')
                             ->relationship('project', 'name')
@@ -59,7 +63,7 @@ class ReportResource extends Resource
                             ->searchable()
                             ->required(),
 
-                        Forms\Components\Select::make('user_id')
+                        Select::make('user_id')
                             ->label('Pengguna')
                             ->placeholder('Pilih Pengguna')
                             ->relationship('user', 'name')
@@ -71,7 +75,7 @@ class ReportResource extends Resource
                             ->dehydratedWhenHidden()
                             ->required(),
 
-                        Forms\Components\TextInput::make('title')
+                        TextInput::make('title')
                             ->label('Judul')
                             ->placeholder('Masukkan Judul Laporan')
                             ->minLength(10)
@@ -79,7 +83,7 @@ class ReportResource extends Resource
                             ->columnSpan(Auth::user()->hasRole('Kontraktor') ? 1 : 2)
                             ->required(),
 
-                        Forms\Components\Textarea::make('description')
+                        Textarea::make('description')
                             ->label('Deskripsi laporan')
                             ->placeholder('Masukkan Deskripsi Laporan')
                             ->minLength(10)
@@ -87,7 +91,7 @@ class ReportResource extends Resource
                             ->autosize(),
 
                         Group::make([
-                            Forms\Components\FileUpload::make('file_path')
+                            FileUpload::make('file_path')
                                 ->label('File Laporan')
                                 ->directory('laporan')
                                 ->visibility('public')
@@ -104,7 +108,7 @@ class ReportResource extends Resource
                                 ->downloadable()
                                 ->required(),
 
-                            Forms\Components\Select::make('status')
+                            Select::make('status')
                                 ->label('Status')
                                 ->placeholder('Pilih Status Laporan')
                                 ->options([
@@ -133,22 +137,27 @@ class ReportResource extends Resource
             })
             ->poll('3s')
             ->columns([
-                Tables\Columns\TextColumn::make('project.name')
+                TextColumn::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->date()
+                    ->sortable(),
+
+                TextColumn::make('project.name')
                     ->label('Proyek')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->label('Nama Kontraktor')
                     ->visible(Auth::user()->hasRole('Administrator'))
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label('Judul')
                     ->limit(20)
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
+                TextColumn::make('status')
+                    ->label('Status Laporan')
                     ->badge()
                     ->color(fn(string $state): string => match ((string) $state) {
                         '0' => 'warning',
@@ -163,21 +172,49 @@ class ReportResource extends Resource
                         default => 'Tidak Diketahui',
                     })
                     ->sortable(),
-                Tables\Columns\TextColumn::make('file_path')
+
+                TextColumn::make('reportEditRequests.status')
+                    ->label('Status Perubahan')
+                    ->badge()
+                    ->color(fn(?string $state): string => match ($state) {
+                        '0' => 'warning',
+                        '1' => 'success',
+                        '2' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn(?string $state): string => match ($state) {
+                        '0' => 'Menunggu Persetujuan',
+                        '1' => 'Disetujui',
+                        '2' => 'Ditolak',
+                        default => 'Tidak Ada',
+                    })
+                    ->default('Tidak Ada')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(),
+
+                TextColumn::make('file_path')
                     ->label('File Laporan')
                     ->formatStateUsing(fn(string $state): string => pathinfo($state, PATHINFO_BASENAME))
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
+                    ->limit(20)
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                DateRangeFilter::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->placeholder('Pilih Rentang Tanggal'),
+
+                SelectFilter::make('status')
+                    ->label('Status Laporan')
+                    ->placeholder('Pilih Status Laporan')
+                    ->options([
+                        '0' => 'Menunggu Persetujuan',
+                        '1' => 'Diterima',
+                        '2' => 'Ditolak',
+                    ])
+                    ->native(false)
+                    ->preload()
+                    ->searchable(),
             ])
             ->actions([
                 Action::make('reportEditRequests')
@@ -190,8 +227,8 @@ class ReportResource extends Resource
                         && Auth::user()?->hasRole('Kontraktor')
                         && !$record->reportEditRequests()
                             ->where('user_id', Auth::id())
-                            ->whereIn('status', [0, 1]) // Cek jika ada pengajuan yang masih pending (0) atau sudah diterima (1)
-                            ->exists() // Jika ada, sembunyikan tombol
+                            ->whereIn('status', [0, 1])
+                            ->exists()
                     )
                     ->form([
                         Textarea::make('reason')
@@ -244,7 +281,7 @@ class ReportResource extends Resource
                     }),
 
                 Action::make('ManageReportEditRequests')
-                    ->label('Terdapat Pengajuan Perubahan')
+                    ->label('Terdapat Pengajuan')
                     ->icon('heroicon-o-document-text')
                     ->color('info')
                     ->visible(

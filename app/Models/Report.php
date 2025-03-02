@@ -30,9 +30,9 @@ class Report extends Model
     }
 
 
-    public function reportEditRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function reportEditRequests(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasMany(\App\Models\ReportEditRequest::class);
+        return $this->hasOne(\App\Models\ReportEditRequest::class, 'report_id', 'id');
     }
 
 }

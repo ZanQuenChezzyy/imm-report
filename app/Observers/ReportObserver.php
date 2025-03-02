@@ -24,7 +24,7 @@ class ReportObserver
             Notification::make()
                 ->title('Laporan Baru')
                 ->info()
-                ->body("Laporan {$report->title} telah dibuat oleh {$report->user->name}.")
+                ->body("Laporan \"{$report->title}\" telah dibuat oleh {$report->user->name}.")
                 ->actions([
                     Action::make('view')
                         ->label('Lihat')

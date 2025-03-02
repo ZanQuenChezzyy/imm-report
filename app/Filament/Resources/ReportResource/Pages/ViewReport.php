@@ -13,7 +13,9 @@ class ViewReport extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            Actions\EditAction::make()
+                ->label('Ubah Laporan')
+                ->icon('heroicon-m-pencil-square'),
         ];
     }
 }
