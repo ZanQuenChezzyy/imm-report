@@ -67,13 +67,14 @@ class User extends Authenticatable implements HasAvatar
         return $this->hasMany(\App\Models\Report::class);
     }
 
-    public function progressRealtimes(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(\App\Models\ProgressRealtime::class);
-    }
-
     public function userCompanies(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(\App\Models\UserCompany::class);
     }
+
+    public function contracts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\Contract::class);
+    }
+
 }

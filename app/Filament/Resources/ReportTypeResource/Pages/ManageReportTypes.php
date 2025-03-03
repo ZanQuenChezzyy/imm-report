@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Filament\Resources\ProjectResource\Pages;
+namespace App\Filament\Resources\ReportTypeResource\Pages;
 
-use App\Filament\Resources\ProjectResource;
+use App\Filament\Resources\ReportTypeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
 
-class ManageProjects extends ManageRecords
+class ManageReportTypes extends ManageRecords
 {
-    protected static string $resource = ProjectResource::class;
+    protected static string $resource = ReportTypeResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\CreateAction::make()
-                ->label('Tambah Proyek')
+                ->label('Tambah Tipe')
                 ->icon('heroicon-m-plus-circle'),
         ];
     }

@@ -10,9 +10,12 @@ class Report extends Model
     use HasFactory;
 
     protected $fillable = [
-        'project_id',
+        'report_type_id',
         'user_id',
         'title',
+        'frequency',
+        'period_start',
+        'period_end',
         'description',
         'status',
         'file_path',
@@ -24,9 +27,9 @@ class Report extends Model
     }
 
 
-    public function Project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function ReportType(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(\App\Models\Project::class, 'project_id', 'id');
+        return $this->belongsTo(\App\Models\ReportType::class, 'report_type_id', 'id');
     }
 
 
@@ -34,5 +37,4 @@ class Report extends Model
     {
         return $this->hasOne(\App\Models\ReportEditRequest::class, 'report_id', 'id');
     }
-
 }

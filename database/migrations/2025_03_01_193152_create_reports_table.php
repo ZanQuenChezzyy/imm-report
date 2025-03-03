@@ -12,12 +12,15 @@ return new class extends Migration {
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->foreignId('report_type_id')->constrained('report_types')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('title', 45);
             $table->text('description')->nullable();
-            $table->unsignedTinyInteger('status')->default(0)->length(1);
+            $table->unsignedTinyInteger('frequency')->length(1);
             $table->string('file_path', 100);
+            $table->date('period_start');
+            $table->date('period_end');
+            $table->unsignedTinyInteger('status')->default(0)->length(1);
             $table->timestamps();
         });
     }

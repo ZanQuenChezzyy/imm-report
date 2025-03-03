@@ -51,9 +51,9 @@ class ReportObserver
                 ->success()
                 ->body("Laporan {$report->title} telah diperbarui statusnya menjadi " . $this->getStatusText($report->status) . " .")
                 ->actions([
-                    Action::make('edit')
-                        ->label('Ubah Laporan')
-                        ->url(\App\Filament\Resources\ReportResource::getUrl('edit', ['record' => $report->id]), shouldOpenInNewTab: false)
+                    Action::make('index')
+                        ->label('Lihat Laporan')
+                        ->url(\App\Filament\Resources\ReportResource::getUrl('index', ['record' => $report->id]), shouldOpenInNewTab: false)
                         ->link(),
                 ])
                 ->sendToDatabase($user);

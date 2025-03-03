@@ -111,9 +111,35 @@ class RoleResource extends Resource
                                                 ->options(
                                                     $permissions->mapWithKeys(function ($permission) {
                                                         $parts = explode(' ', $permission->name);
-                                                        array_pop($parts);
-                                                        $action = implode(' ', $parts);
-                                                        $translatedAction = __('permission.' . $action);
+                                                        $count = count($parts);
+
+                                                        if ($count === 1) {
+                                                            $action = $parts[0];
+                                                            $entity = null;
+                                                        } elseif ($count === 2) {
+                                                            [$action, $entity] = $parts;
+                                                        } else {
+                                                            // Prioritas untuk "Force Delete" dan "View Any"
+                                                            if (implode(' ', array_slice($parts, 0, 2)) === 'View Any') {
+                                                                $action = 'View Any';
+                                                                $entity = implode(' ', array_slice($parts, 2));
+                                                            } elseif (implode(' ', array_slice($parts, 0, 2)) === 'Force Delete') {
+                                                                $action = 'Force Delete';
+                                                                $entity = implode(' ', array_slice($parts, 2));
+                                                            } else {
+                                                                $entity = implode(' ', array_slice($parts, -2)); // Entity diambil dari 2 kata terakhir
+                                                                $action = implode(' ', array_slice($parts, 0, -2)); // Sisanya sebagai action
+                                                            }
+                                                        }
+
+                                                        // Gunakan terjemahan jika tersedia
+                                                        $translatedAction = __('permission.' . $action, [], 'id');
+
+                                                        // Jika tidak ditemukan terjemahan, gunakan action asli dengan kapitalisasi
+                                                        if ($translatedAction === 'permission.' . $action) {
+                                                            $translatedAction = ucfirst($action);
+                                                        }
+
                                                         return [$permission->id => $translatedAction];
                                                     })
                                                 )

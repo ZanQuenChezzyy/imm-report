@@ -25,6 +25,7 @@ class UserRolePermissionSeeder extends Seeder
             'Delete User',
             'Restore User',
             'Force Delete User',
+
             'View Any Role',
             'View Role',
             'Create Role',
@@ -32,6 +33,7 @@ class UserRolePermissionSeeder extends Seeder
             'Delete Role',
             'Restore Role',
             'Force Delete Role',
+
             'View Any Permission',
             'View Permission',
             'Create Permission',
@@ -39,13 +41,33 @@ class UserRolePermissionSeeder extends Seeder
             'Delete Permission',
             'Restore Permission',
             'Force Delete Permission',
-            'View Any Data',
-            'View Data',
-            'Create Data',
-            'Update Data',
-            'Delete Data',
-            'Restore Data',
-            'Force Delete Data',
+
+            // Permissions for Company
+            'View Any Company',
+            'View Company',
+            'Create Company',
+            'Update Company',
+            'Delete Company',
+            'Restore Company',
+            'Force Delete Company',
+
+            // Permissions for Report Type
+            'View Any Report Type',
+            'View Report Type',
+            'Create Report Type',
+            'Update Report Type',
+            'Delete Report Type',
+            'Restore Report Type',
+            'Force Delete Report Type',
+
+            // Permissions for Report
+            'View Any Report',
+            'View Report',
+            'Create Report',
+            'Update Report',
+            'Delete Report',
+            'Restore Report',
+            'Force Delete Report',
         ];
 
         // Create permissions
@@ -77,15 +99,39 @@ class UserRolePermissionSeeder extends Seeder
                 'Delete Permission',
                 'Restore Permission',
                 'Force Delete Permission',
+
+                // Permissions for Company
+                'View Any Company',
+                'View Company',
+                'Create Company',
+                'Update Company',
+                'Delete Company',
+                'Restore Company',
+                'Force Delete Company',
+
+                // Permissions for Report Type
+                'View Any Report Type',
+                'View Report Type',
+                'Create Report Type',
+                'Update Report Type',
+                'Delete Report Type',
+                'Restore Report Type',
+                'Force Delete Report Type',
+
+                // Permissions for Report
+                'View Any Report',
+                'View Report',
+                'Create Report',
+                'Update Report',
+                'Delete Report',
+                'Restore Report',
+                'Force Delete Report',
             ],
-            'User' => [
-                'View Any Data',
-                'View Data',
-                'Create Data',
-                'Update Data',
-                'Delete Data',
-                'Restore Data',
-                'Force Delete Data',
+            'Kontraktor' => [
+                'View Any Report',
+                'View Report',
+                'Create Report',
+                'Update Report',
             ],
         ];
 
@@ -101,12 +147,14 @@ class UserRolePermissionSeeder extends Seeder
                 'email' => 'admin@starter.com',
                 'password' => Hash::make('12345678'),
                 'role' => 'Administrator',
+                'status' => true,
             ],
             [
                 'name' => 'User',
                 'email' => 'user@starter.com',
                 'password' => Hash::make('12345678'),
-                'role' => 'User',
+                'role' => 'Kontraktor',
+                'status' => true,
             ],
         ];
 
@@ -116,6 +164,7 @@ class UserRolePermissionSeeder extends Seeder
                 [
                     'name' => $userData['name'],
                     'password' => $userData['password'],
+                    'status' => $userData['status'],
                 ]
             );
 

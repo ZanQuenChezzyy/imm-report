@@ -10,12 +10,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('progress_realtimes', function (Blueprint $table) {
+        Schema::create('contracts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->unsignedTinyInteger('progress')->default(0)->length(1);
-            $table->text('description');
+            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->string('number', 45);
+            $table->string('name', 45);
+            $table->date('period_start');
+            $table->date('period_end');
+            $table->string('file', 150)->nullable();
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }
@@ -25,6 +29,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('progress_realtimes');
+        Schema::dropIfExists('contracts');
     }
 };

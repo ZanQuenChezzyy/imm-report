@@ -23,6 +23,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Tables\Columns\TextColumn;
@@ -33,7 +34,7 @@ class ReportResource extends Resource
 {
     protected static ?string $model = Report::class;
     protected static ?string $label = 'Laporan';
-    protected static ?string $navigationGroup = 'Laporan & Progres';
+    protected static ?string $navigationGroup = 'Kelola Laporan';
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $activeNavigationIcon = 'heroicon-s-document-text';
     protected static ?int $navigationSort = 4;
@@ -54,13 +55,18 @@ class ReportResource extends Resource
             ->schema([
                 Section::make('Informasi Laporan')
                     ->schema([
-                        Select::make('project_id')
-                            ->label('Proyek')
-                            ->placeholder('Pilih Proyek')
-                            ->relationship('project', 'name')
+                        Select::make('report_type_id')
+                            ->label('Tipe Laporan')
+                            ->placeholder('Pilih Tipe Laporan')
+                            ->relationship('reportType', 'name')
                             ->native(false)
                             ->preload()
                             ->searchable()
+                            ->live()
+                            ->afterStateUpdated(
+                                fn($state, callable $set) =>
+                                $set('title', \App\Models\ReportType::find($state)?->name ?? '')
+                            )
                             ->required(),
 
                         Select::make('user_id')
@@ -77,10 +83,66 @@ class ReportResource extends Resource
 
                         TextInput::make('title')
                             ->label('Judul')
-                            ->placeholder('Masukkan Judul Laporan')
+                            ->placeholder('Judul Laporan Otomatis Terisi')
                             ->minLength(10)
                             ->maxLength(45)
-                            ->columnSpan(Auth::user()->hasRole('Kontraktor') ? 1 : 2)
+                            ->disabled()
+                            ->dehydrated()
+                            ->required(),
+
+                        Select::make('frequency')
+                            ->label('Periode / Frekuensi')
+                            ->placeholder('Pilih Periode / Frekuensi')
+                            ->options([
+                                0 => 'Harian',
+                                1 => 'Mingguan',
+                                2 => 'Bulanan',
+                                3 => '3 Bulan',
+                                4 => '6 Bulan',
+                                5 => '1 Tahun',
+                            ])
+                            ->native(false)
+                            ->preload()
+                            ->searchable()
+                            ->live()
+                            ->afterStateUpdated(
+                                fn($state, callable $get, callable $set) =>
+                                $set('period_end', match ($state) {
+                                    '0' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addDay()->toDateString() : null,
+                                    '1' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addWeek()->toDateString() : null,
+                                    '2' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonth()->toDateString() : null,
+                                    '3' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonths(3)->toDateString() : null,
+                                    '4' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonths(6)->toDateString() : null,
+                                    '5' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addYear()->toDateString() : null,
+                                    default => null,
+                                })
+                            ),
+
+                        DatePicker::make('period_start')
+                            ->label('Tanggal Mulai')
+                            ->placeholder('Pilih Tanggal Mulai')
+                            ->native(false)
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(
+                                fn($state, callable $get, callable $set) =>
+                                $set('period_end', match ($get('frequency')) {
+                                    '0' => $state ? \Carbon\Carbon::parse($state)->addDay()->toDateString() : null,
+                                    '1' => $state ? \Carbon\Carbon::parse($state)->addWeek()->toDateString() : null,
+                                    '2' => $state ? \Carbon\Carbon::parse($state)->addMonth()->toDateString() : null,
+                                    '3' => $state ? \Carbon\Carbon::parse($state)->addMonths(3)->toDateString() : null,
+                                    '4' => $state ? \Carbon\Carbon::parse($state)->addMonths(6)->toDateString() : null,
+                                    '5' => $state ? \Carbon\Carbon::parse($state)->addYear()->toDateString() : null,
+                                    default => null,
+                                })
+                            ),
+
+                        DatePicker::make('period_end')
+                            ->label('Tanggal Selesai')
+                            ->placeholder('Otomatis')
+                            ->native(false)
+                            ->disabled()
+                            ->dehydrated()
                             ->required(),
 
                         Textarea::make('description')
@@ -135,15 +197,15 @@ class ReportResource extends Resource
                     $query->where('user_id', Auth::id());
                 }
             })
-            ->poll('3s')
+            ->poll('10s')
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->date()
                     ->sortable(),
 
-                TextColumn::make('project.name')
-                    ->label('Proyek')
+                TextColumn::make('ReportType.name')
+                    ->label('Tipe Laporan')
                     ->sortable(),
 
                 TextColumn::make('user.name')
@@ -170,6 +232,11 @@ class ReportResource extends Resource
                         '1' => 'Diterima',
                         '2' => 'Ditolak',
                         default => 'Tidak Diketahui',
+                    })
+                    ->icon(fn(string $state): string => match ($state) {
+                        '0' => 'heroicon-o-clock',
+                        '1' => 'heroicon-o-document-check',
+                        '2' => 'heroicon-o-document-minus',
                     })
                     ->sortable(),
 
@@ -217,6 +284,13 @@ class ReportResource extends Resource
                     ->searchable(),
             ])
             ->actions([
+                Action::make('approve_status')
+                    ->label('Terima Laporan')
+                    ->icon('heroicon-o-document-check')
+                    ->color('success')
+                    ->action(fn($record) => $record->update(['status' => 1]))
+                    ->visible(fn($record) => Auth::user()?->hasRole('Administrator') && $record->status === 0),
+
                 Action::make('reportEditRequests')
                     ->label('Ajukan Perubahan')
                     ->icon('heroicon-o-pencil-square')
@@ -339,7 +413,7 @@ class ReportResource extends Resource
                         // Kirim notifikasi ke user
                         Notification::make()
                             ->title("Pengajuan Perubahan {$statusMessage}")
-                            ->success()
+                            ->info()
                             ->body("Pengajuan perubahan Anda pada laporan \"{$record->title}\" telah {$statusMessage}.")
                             ->actions([
                                 NotificationAction::make('view')

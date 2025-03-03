@@ -17,4 +17,10 @@ class Company extends Model
     {
         return $this->hasOne(\App\Models\UserCompany::class);
     }
+
+    public function contracts(): \Illuminate\Database\Eloquent\Relations\HasMany
+{
+    return $this->hasMany(\App\Models\Contract::class);
+}
+
 }

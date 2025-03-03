@@ -14,10 +14,12 @@ return new class extends Migration {
             $table->id();
             $table->string('name', 45);
             $table->string('email', 45)->unique();
+            $table->string('npwp', 21)->unique()->nullable();
+            $table->string('phone', 15)->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('avatar_url', 100)->nullable();
-            $table->unsignedTinyInteger('status')->default(0)->length(1);
+            $table->boolean('status')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

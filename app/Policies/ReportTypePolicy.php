@@ -2,26 +2,26 @@
 
 namespace App\Policies;
 
-use App\Models\Project;
+use App\Models\ReportType;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class ProjectPolicy
+class ReportTypePolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('View Any Project');
+        return $user->can('View Any Report Type');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Project $project): bool
+    public function view(User $user, ReportType $reportType): bool
     {
-        return $user->can('View Project');
+        return $user->can('View Report Type');
     }
 
     /**
@@ -29,38 +29,38 @@ class ProjectPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('Create Project');
+        return $user->can('Create Report Type');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Project $project): bool
+    public function update(User $user, ReportType $reportType): bool
     {
-        return $user->can('Update Project');
+        return $user->can('Update Report Type');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Project $project): bool
+    public function delete(User $user, ReportType $reportType): bool
     {
-        return $user->can('Delete Project');
+        return $user->can('Delete Report Type');
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Project $project): bool
+    public function restore(User $user, ReportType $reportType): bool
     {
-        return $user->can('Restore Project');
+        return $user->can('Restore Report Type');
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Project $project): bool
+    public function forceDelete(User $user, ReportType $reportType): bool
     {
-        return $user->can('Force Delete Project');
+        return $user->can('Force Delete Report Type');
     }
 }

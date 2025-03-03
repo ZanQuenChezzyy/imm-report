@@ -2,22 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProjectResource\Pages;
-use App\Filament\Resources\ProjectResource\RelationManagers;
-use App\Models\Project;
+use App\Filament\Resources\ReportTypeResource\Pages;
+use App\Filament\Resources\ReportTypeResource\RelationManagers;
+use App\Models\ReportType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ProjectResource extends Resource
+class ReportTypeResource extends Resource
 {
-    protected static ?string $model = Project::class;
-    protected static ?string $label = 'Proyek';
+    protected static ?string $model = ReportType::class;
+    protected static ?string $label = 'Tipe Laporan';
     protected static ?string $navigationGroup = 'Kelola Data';
     protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
     protected static ?string $activeNavigationIcon = 'heroicon-s-presentation-chart-line';
@@ -30,16 +29,16 @@ class ProjectResource extends Resource
     {
         return static::getModel()::count() < 2 ? 'danger' : 'info';
     }
-    protected static ?string $navigationBadgeTooltip = 'Total Proyek';
-    protected static ?string $slug = 'proyek';
+    protected static ?string $navigationBadgeTooltip = 'Total Tipe';
+    protected static ?string $slug = 'tipe-laporan';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Nama Proyek')
-                    ->placeholder('Masukkan Nama Proyek')
+                    ->label('Nama Tipe Laporan')
+                    ->placeholder('Masukkan Nama Tipe Laporan')
                     ->minLength(10)
                     ->maxLength(100)
                     ->columnSpanFull()
@@ -64,7 +63,7 @@ class ProjectResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nama Proyek')
+                    ->label('Tipe Laporan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Tanggal Mulai')
@@ -79,15 +78,9 @@ class ProjectResource extends Resource
                 //
             ])
             ->actions([
-                ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make()
-                        ->color('primary'),
-                    Tables\Actions\DeleteAction::make(),
-                ])
-                    ->icon('heroicon-o-ellipsis-horizontal-circle')
-                    ->color('info')
-                    ->tooltip('Aksi')
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -99,7 +92,7 @@ class ProjectResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageProjects::route('/'),
+            'index' => Pages\ManageReportTypes::route('/'),
         ];
     }
 }
