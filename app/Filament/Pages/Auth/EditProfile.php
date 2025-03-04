@@ -98,26 +98,45 @@ class EditProfile extends BaseEditProfile
                                     })
                                     ->Unique(ignoreRecord: true),
                             ]),
-                        Tab::make('Kontrak')
+                        Tab::make('Perusahaan')
                             ->schema([
+                                Select::make('companies')
+                                    ->label('Perusahaan')
+                                    ->placeholder('Pilih Perusahaan')
+                                    ->relationship('companies', 'name')
+                                    ->native(false)
+                                    ->preload()
+                                    ->columnSpanFull()
+                                    ->searchable()
+                                    ->required(),
+
                                 Select::make('contracts')
                                     ->label('Kontrak Kerja')
                                     ->placeholder('Pilih atau Tambahkan Kontrak Kerja')
                                     ->relationship(
-                                        'contracts',
+                                        'contracts', // Menggunakan BelongsToMany (relasi pivot)
                                         'name',
                                         fn($query, $get) => $query
-                                            ->where('user_id', $get('id')) // Hanya kontrak milik user yang sedang diedit
-                                            ->whereDate('period_end', '>=', now()) // Hanya kontrak yang masih aktif
+                                            ->where(function ($q) use ($get) {
+                                                $q->where('contracts.user_id', $get('id')) // Kontrak milik user langsung
+                                                    ->orWhereHas('users', function ($q2) use ($get) { // Kontrak dari pivot
+                                                        $q2->where('users.id', $get('id'));
+                                                    });
+                                            })
+                                            ->whereDate('period_end', '>=', now()) // Hanya kontrak yang belum expired
                                     )
                                     ->default(
-                                        fn($get) => \App\Models\Contract::where('user_id', $get('id'))
-                                            ->where('status', 1) // Hanya kontrak yang statusnya aktif
-                                            ->orderByDesc('period_start') // Ambil kontrak terbaru
-                                            ->value('id') // Ambil ID sebagai default
+                                        fn($get) => \App\Models\Contract::where(function ($q) use ($get) {
+                                            $q->where('contracts.user_id', $get('id')) // Kontrak milik user langsung
+                                                ->orWhereHas('users', function ($q2) use ($get) { // Kontrak dari pivot
+                                                    $q2->where('users.id', $get('id'));
+                                                });
+                                        })
+                                            ->where('status', 1)
+                                            ->orderByDesc('period_start')
+                                            ->pluck('id') // Ambil ID sebagai default
+                                            ->first() ?? "Kontrak tidak diketahui"
                                     )
-                                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->name} - (" . ($record->status ? 'Aktif' : 'Tidak Aktif') . ")")
-                                    ->native(false)
                                     ->createOptionForm([
                                         Group::make([
                                             Select::make('user_id')
@@ -298,6 +317,15 @@ class EditProfile extends BaseEditProfile
                                                 ->required(),
                                         ])->columns(2)
                                     ])
+                                    ->getOptionLabelFromRecordUsing(
+                                        fn($record) =>
+                                        $record ? "{$record->name} - (" . ($record->status ? 'Aktif' : 'Tidak Aktif') . ")" : "Kontrak tidak diketahui"
+                                    )
+                                    ->createOptionUsing(function (array $data): ?int {
+                                        $contract = \App\Models\Contract::create($data);
+                                        return null; // Jangan langsung memilih opsi yang baru dibuat
+                                    })
+                                    ->native(false)
                                     ->searchable()
                                     ->preload()
                                     ->columnSpanFull(),

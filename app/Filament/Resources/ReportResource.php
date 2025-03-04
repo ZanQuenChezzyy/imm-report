@@ -28,6 +28,7 @@ use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 
 class ReportResource extends Resource
@@ -87,6 +88,8 @@ class ReportResource extends Resource
                             ->minLength(10)
                             ->maxLength(45)
                             ->disabled()
+                            ->hidden(Auth::user()->hasRole('Kontraktor'))
+                            ->dehydratedWhenHidden(Auth::user()->hasRole('Kontraktor'))
                             ->dehydrated()
                             ->required(),
 
@@ -160,9 +163,12 @@ class ReportResource extends Resource
                                 ->preserveFilenames()
                                 ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, callable $get): string {
                                     $userName = User::find($get('user_id'))?->name ?? 'Unknown';
+                                    $reportType = \App\Models\ReportType::find($get('report_type_id'))?->name ?? 'Unknown';
+
                                     return str($userName)
                                         ->replace(' ', '_')
-                                        ->append(' - ', $file->getClientOriginalName());
+                                        ->append(' - ', str($reportType)->replace(' ', '_'))
+                                        ->append('.', $file->getClientOriginalExtension()); // Pastikan ekstensi file tetap ada
                                 })
                                 ->maxSize(10240)
                                 ->helperText('Ukuran file maksimal 10MB')
@@ -267,9 +273,13 @@ class ReportResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                DateRangeFilter::make('created_at')
-                    ->label('Dibuat Pada')
-                    ->placeholder('Pilih Rentang Tanggal'),
+                SelectFilter::make('report_type_id')
+                    ->label('Laporan')
+                    ->placeholder('Pilih Laporan')
+                    ->relationship('reportType', 'name')
+                    ->native(false)
+                    ->preload()
+                    ->searchable(),
 
                 SelectFilter::make('status')
                     ->label('Status Laporan')
@@ -282,7 +292,11 @@ class ReportResource extends Resource
                     ->native(false)
                     ->preload()
                     ->searchable(),
-            ])
+
+                DateRangeFilter::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->placeholder('Pilih Rentang Tanggal'),
+            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 Action::make('approve_status')
                     ->label('Terima Laporan')

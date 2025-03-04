@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ContractsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'contracts';
+    protected static string $relationship = 'contract';
 
     public function form(Form $form): Form
     {

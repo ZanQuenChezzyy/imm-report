@@ -127,109 +127,30 @@ class UserResource extends Resource
                             ->label('Kontrak Kerja')
                             ->placeholder('Pilih atau Tambahkan Kontrak Kerja')
                             ->relationship(
-                                'contracts',
+                                'contracts', // Menggunakan BelongsToMany (relasi pivot)
                                 'name',
                                 fn($query, $get) => $query
-                                    ->where('user_id', $get('id')) // Hanya kontrak milik user yang sedang diedit
-                                    ->whereDate('period_end', '>=', now()) // Hanya kontrak yang masih aktif
+                                    ->where(function ($q) use ($get) {
+                                        $q->where('contracts.user_id', $get('id')) // Kontrak milik user langsung
+                                            ->orWhereHas('users', function ($q2) use ($get) { // Kontrak dari pivot
+                                                $q2->where('users.id', $get('id'));
+                                            });
+                                    })
+                                    ->whereDate('period_end', '>=', now()) // Hanya kontrak yang belum expired
                             )
                             ->default(
-                                fn($get) => \App\Models\Contract::where('user_id', $get('id'))
-                                    ->where('status', 1) // Hanya kontrak yang statusnya aktif
-                                    ->orderByDesc('period_start') // Ambil kontrak terbaru
-                                    ->value('id') // Ambil ID sebagai default
+                                fn($get) => \App\Models\Contract::where(function ($q) use ($get) {
+                                    $q->where('contracts.user_id', $get('id')) // Kontrak milik user langsung
+                                        ->orWhereHas('users', function ($q2) use ($get) { // Kontrak dari pivot
+                                            $q2->where('users.id', $get('id'));
+                                        });
+                                })
+                                    ->where('status', 1)
+                                    ->orderByDesc('period_start')
+                                    ->pluck('id') // Ambil ID sebagai default
+                                    ->first() // Hindari error jika tidak ada data
                             )
                             ->native(false)
-                            ->createOptionForm([
-                                Group::make([
-                                    Select::make('user_id')
-                                        ->label('Nama Pengguna')
-                                        ->relationship('user', 'name')
-                                        ->native(false)
-                                        ->preload()
-                                        ->searchable()
-                                        ->default(fn($livewire) => $livewire->record?->id)
-                                        ->hidden()
-                                        ->dehydratedWhenhidden()
-                                        ->required(),
-
-                                    Select::make('company_id')
-                                        ->label('Perusahaan Pembuat Kontrak')
-                                        ->relationship('company', 'name')
-                                        ->native(false)
-                                        ->preload()
-                                        ->searchable()
-                                        ->columnSpanFull()
-                                        ->required(),
-
-                                    TextInput::make('number')
-                                        ->label('Nomor Kontrak')
-                                        ->placeholder('Masukkan Nomor Kontrak')
-                                        ->minLength(5)
-                                        ->maxLength(45)
-                                        ->required(),
-
-                                    TextInput::make('name')
-                                        ->label('Nama Kontrak')
-                                        ->placeholder('Masukkan Nama Kontrak')
-                                        ->minLength(5)
-                                        ->maxLength(45)
-                                        ->required(),
-
-                                    DatePicker::make('period_start')
-                                        ->label('Tanggal Mulai')
-                                        ->placeholder('Pilih Tanggal Mulai')
-                                        ->native(false)
-                                        ->live()
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                            $now = now();
-                                            $start = $get('period_start');
-                                            $end = $get('period_end');
-
-                                            if ($start && $end) {
-                                                $set('status', ($now->between($start, $end)) ? '1' : '0');
-                                            } else {
-                                                $set('status', '0');
-                                            }
-                                        })
-                                        ->required(),
-
-                                    DatePicker::make('period_end')
-                                        ->label('Tanggal Selesai')
-                                        ->placeholder('Pilih Tanggal Selesai')
-                                        ->native(false)
-                                        ->live()
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                            $now = now();
-                                            $start = $get('period_start');
-                                            $end = $get('period_end');
-
-                                            if ($start && $end) {
-                                                $set('status', ($now->between($start, $end)) ? '1' : '0');
-                                            } else {
-                                                $set('status', '0');
-                                            }
-                                        })
-                                        ->required(),
-
-                                    FileUpload::make('file')
-                                        ->label('Lampiran (Jika Ada)')
-                                        ->columnSpanFull()
-                                        ->nullable(),
-
-                                    Select::make('status')
-                                        ->label('Status Kontrak')
-                                        ->placeholder('Pilih Status Kontrak')
-                                        ->options([
-                                            '0' => 'Tidak Aktif',
-                                            '1' => 'Aktif'
-                                        ])
-                                        ->native(false)
-                                        ->hidden()
-                                        ->dehydratedWhenHidden()
-                                        ->required(),
-                                ])->columns(2)
-                            ])
                             ->searchable()
                             ->preload()
                             ->columnSpanFull(),

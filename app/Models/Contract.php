@@ -30,4 +30,9 @@ class Contract extends Model
     {
         return $this->belongsTo(\App\Models\User::class, 'user_id', 'id');
     }
+
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'user_contracts', 'contract_id', 'user_id');
+    }
 }

@@ -74,8 +74,13 @@ class User extends Authenticatable implements HasAvatar
         return $this->belongsToMany(\App\Models\Company::class, 'user_companies', 'user_id', 'company_id');
     }
 
-    public function contracts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function contract(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Models\Contract::class, 'user_id', 'id');
+    }
+
+    public function contracts(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\Contract::class, 'user_contracts', 'user_id', 'contract_id');
     }
 }
