@@ -25,6 +25,8 @@ class User extends Authenticatable implements HasAvatar
         'email',
         'avatar_url',
         'password',
+        'npwp',
+        'phone',
         'status',
     ];
 
@@ -67,14 +69,13 @@ class User extends Authenticatable implements HasAvatar
         return $this->hasMany(\App\Models\Report::class);
     }
 
-    public function userCompanies(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function companies(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasOne(\App\Models\UserCompany::class);
+        return $this->belongsToMany(\App\Models\Company::class, 'user_companies', 'user_id', 'company_id');
     }
 
     public function contracts(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\Contract::class);
+        return $this->hasMany(\App\Models\Contract::class, 'user_id', 'id');
     }
-
 }

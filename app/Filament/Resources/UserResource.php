@@ -15,13 +15,17 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -58,6 +62,11 @@ class UserResource extends Resource
     protected static ?string $navigationBadgeTooltip = 'Total Pengguna';
     protected static ?string $slug = 'pengguna';
 
+    public static function getUserId(Get $get, Set $set)
+    {
+
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -90,6 +99,16 @@ class UserResource extends Resource
                                     ->columnSpanFull()
                                     ->searchable()
                                     ->required(),
+
+                                Select::make('companies')
+                                    ->label('Perusahaan Pengguna')
+                                    ->placeholder('Pilih Perusahaan Pengguna')
+                                    ->relationship('companies', 'name')
+                                    ->native(false)
+                                    ->preload()
+                                    ->columnSpanFull()
+                                    ->searchable()
+                                    ->required(),
                             ]),
                     ])
                     ->columnSpan([
@@ -104,11 +123,120 @@ class UserResource extends Resource
 
                 Section::make('Informasi Pribadi')
                     ->schema([
+                        Select::make('contracts')
+                            ->label('Kontrak Kerja')
+                            ->placeholder('Pilih atau Tambahkan Kontrak Kerja')
+                            ->relationship(
+                                'contracts',
+                                'name',
+                                fn($query, $get) => $query
+                                    ->where('user_id', $get('id')) // Hanya kontrak milik user yang sedang diedit
+                                    ->whereDate('period_end', '>=', now()) // Hanya kontrak yang masih aktif
+                            )
+                            ->default(
+                                fn($get) => \App\Models\Contract::where('user_id', $get('id'))
+                                    ->where('status', 1) // Hanya kontrak yang statusnya aktif
+                                    ->orderByDesc('period_start') // Ambil kontrak terbaru
+                                    ->value('id') // Ambil ID sebagai default
+                            )
+                            ->native(false)
+                            ->createOptionForm([
+                                Group::make([
+                                    Select::make('user_id')
+                                        ->label('Nama Pengguna')
+                                        ->relationship('user', 'name')
+                                        ->native(false)
+                                        ->preload()
+                                        ->searchable()
+                                        ->default(fn($livewire) => $livewire->record?->id)
+                                        ->hidden()
+                                        ->dehydratedWhenhidden()
+                                        ->required(),
+
+                                    Select::make('company_id')
+                                        ->label('Perusahaan Pembuat Kontrak')
+                                        ->relationship('company', 'name')
+                                        ->native(false)
+                                        ->preload()
+                                        ->searchable()
+                                        ->columnSpanFull()
+                                        ->required(),
+
+                                    TextInput::make('number')
+                                        ->label('Nomor Kontrak')
+                                        ->placeholder('Masukkan Nomor Kontrak')
+                                        ->minLength(5)
+                                        ->maxLength(45)
+                                        ->required(),
+
+                                    TextInput::make('name')
+                                        ->label('Nama Kontrak')
+                                        ->placeholder('Masukkan Nama Kontrak')
+                                        ->minLength(5)
+                                        ->maxLength(45)
+                                        ->required(),
+
+                                    DatePicker::make('period_start')
+                                        ->label('Tanggal Mulai')
+                                        ->placeholder('Pilih Tanggal Mulai')
+                                        ->native(false)
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            $now = now();
+                                            $start = $get('period_start');
+                                            $end = $get('period_end');
+
+                                            if ($start && $end) {
+                                                $set('status', ($now->between($start, $end)) ? '1' : '0');
+                                            } else {
+                                                $set('status', '0');
+                                            }
+                                        })
+                                        ->required(),
+
+                                    DatePicker::make('period_end')
+                                        ->label('Tanggal Selesai')
+                                        ->placeholder('Pilih Tanggal Selesai')
+                                        ->native(false)
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            $now = now();
+                                            $start = $get('period_start');
+                                            $end = $get('period_end');
+
+                                            if ($start && $end) {
+                                                $set('status', ($now->between($start, $end)) ? '1' : '0');
+                                            } else {
+                                                $set('status', '0');
+                                            }
+                                        })
+                                        ->required(),
+
+                                    FileUpload::make('file')
+                                        ->label('Lampiran (Jika Ada)')
+                                        ->columnSpanFull()
+                                        ->nullable(),
+
+                                    Select::make('status')
+                                        ->label('Status Kontrak')
+                                        ->placeholder('Pilih Status Kontrak')
+                                        ->options([
+                                            '0' => 'Tidak Aktif',
+                                            '1' => 'Aktif'
+                                        ])
+                                        ->native(false)
+                                        ->hidden()
+                                        ->dehydratedWhenHidden()
+                                        ->required(),
+                                ])->columns(2)
+                            ])
+                            ->searchable()
+                            ->preload()
+                            ->columnSpanFull(),
+
                         TextInput::make('name')
                             ->label(__('filament-panels::pages/auth/edit-profile.form.name.label'))
                             ->placeholder(__('filament-panels::pages/auth/edit-profile.form.name.placeholder'))
-                            ->inlineLabel()
-                            ->columnSpanFull()
                             ->required()
                             ->minLength(3)
                             ->maxLength(45)
@@ -117,23 +245,60 @@ class UserResource extends Resource
                         TextInput::make('email')
                             ->label(__('filament-panels::pages/auth/edit-profile.form.email.label'))
                             ->placeholder(__('filament-panels::pages/auth/edit-profile.form.email.placeholder'))
-                            ->inlineLabel()
-                            ->columnSpanFull()
                             ->email()
                             ->required()
                             ->minLength(3)
                             ->maxLength(45)
                             ->unique(ignoreRecord: true),
+
+                        TextInput::make('npwp')
+                            ->label('Nomor NPWP')
+                            ->placeholder('Masukkan nomor NPWP')
+                            ->minLength(12)
+                            ->maxLength(21)
+                            ->unique(ignoreRecord: true),
+
+                        TextInput::make('phone')
+                            ->label('Nomor Telepon')
+                            ->placeholder('Masukkan Nomor Telepon')
+                            ->prefix('+62')
+                            ->minValue(1)
+                            ->minLength(10)
+                            ->maxLength(15)
+                            ->tel()
+                            ->mask(
+                                RawJs::make(<<<'JS'
+                                $input.startsWith('+62')
+                                    ? $input.replace(/^\+62/, '')
+                                    : ($input.startsWith('62')
+                                        ? $input.replace(/^62/, '')
+                                        : ($input.startsWith('0')
+                                    ? $input.replace(/^0/, '')
+                                    : $input
+                                    )
+                                )
+                            JS)
+                            )
+                            ->stripCharacters([' ', '-', '(', ')'])
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $cleaned = preg_replace('/^(\+62|62|0)/', '', $state);
+                                if (!str_starts_with($cleaned, '8')) {
+                                    $set('no_hp', null);
+                                } else {
+                                    $set('no_hp', $cleaned);
+                                }
+                            })
+                            ->Unique(ignoreRecord: true),
+
                         TextInput::make('password')
                             ->label(function ($record) {
                                 return $record ? 'Ubah Kata Sandi' : 'Kata Sandi';
                             })
                             ->placeholder(function ($record) {
-                                return $record ? 'Kosongkan jika tidak ingin mengubah' : 'Masukkan Kata Sandi';
+                                return $record ? 'Kata Sandi' : 'Masukkan Kata Sandi';
                             })
-                            ->inlineLabel()
-                            ->columnSpanFull()
                             ->password()
+                            ->helperText('Kosongkan jika tidak ingin mengubah Kata sandi')
                             ->revealable(filament()->arePasswordsRevealable())
                             ->rule(Password::default())
                             ->autocomplete('new-password')
@@ -146,8 +311,6 @@ class UserResource extends Resource
                         TextInput::make('passwordConfirmation')
                             ->label(__('Konfirmasi Kata Sandi'))
                             ->placeholder(__('Masukkan lagi Kata sandi'))
-                            ->inlineLabel()
-                            ->columnSpanFull()
                             ->password()
                             ->revealable(filament()->arePasswordsRevealable())
                             ->required()
@@ -163,25 +326,50 @@ class UserResource extends Resource
                         ])
                     ->columns(2),
 
-                Section::make()
-                    ->schema([
-                        Placeholder::make('created_at')
-                            ->label('Dibuat Saat')
-                            ->content(fn(User $record): ?string => $record->created_at?->diffForHumans()),
+                Group::make([
+                    Section::make()
+                        ->schema([
+                            Placeholder::make('created_at')
+                                ->label('Dibuat Saat')
+                                ->content(fn(User $record): ?string => $record->created_at?->diffForHumans()),
 
-                        Placeholder::make('updated_at')
-                            ->label('Terakhir Diperbarui')
-                            ->content(fn(User $record): ?string => $record->created_at?->diffForHumans()),
-                    ])
-                    ->columnSpan([
-                        'default' => 3,
-                        'sm' => 3,
-                        'md' => 3,
-                        'lg' => 4,
-                        'xl' => 1,
-                        '2xl' => 1,
-                    ])
-                    ->hidden(fn(?User $record) => $record === null)
+                            Placeholder::make('updated_at')
+                                ->label('Terakhir Diperbarui')
+                                ->content(fn(User $record): ?string => $record->updated_at?->diffForHumans()),
+                        ])
+                        ->columnSpan([
+                            'default' => 3,
+                            'sm' => 3,
+                            'md' => 3,
+                            'lg' => 4,
+                            'xl' => 1,
+                            '2xl' => 1,
+                        ])
+                        ->hidden(fn(?User $record) => $record === null),
+                    Section::make()
+                        ->schema([
+                            Select::make('status')
+                                ->label('Status Pengguna')
+                                ->placeholder('Pilih Status Pengguna')
+                                ->options([
+                                    true => 'Aktif',
+                                    false => 'Non aktif',
+                                ])
+                                ->native(false)
+                                ->preload()
+                                ->searchable(),
+                        ])
+                        ->columnSpan([
+                            'default' => 3,
+                            'sm' => 3,
+                            'md' => 3,
+                            'lg' => 4,
+                            'xl' => 1,
+                            '2xl' => 1,
+                        ])
+                        ->hidden(fn(?User $record) => $record === null),
+                ])
+
             ])->columns(4);
     }
 
@@ -265,7 +453,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ContractsRelationManager::class,
         ];
     }
 

@@ -19,10 +19,8 @@ class UserCompany extends Model
         return $this->belongsTo(\App\Models\User::class, 'user_id', 'id');
     }
 
-
-    public function Company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function UserCompany(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(\App\Models\Company::class, 'company_id', 'id');
+        return $this->belongsToMany(\App\Models\Company::class, 'user_companies', 'user_id', 'company_id');
     }
-
 }

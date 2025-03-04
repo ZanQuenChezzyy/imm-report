@@ -13,14 +13,13 @@ class Company extends Model
         'name',
     ];
 
-    public function userCompanies(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasOne(\App\Models\UserCompany::class);
+        return $this->belongsToMany(\App\Models\User::class, 'user_companies', 'company_id', 'user_id');
     }
 
     public function contracts(): \Illuminate\Database\Eloquent\Relations\HasMany
-{
-    return $this->hasMany(\App\Models\Contract::class);
-}
-
+    {
+        return $this->hasMany(\App\Models\Contract::class);
+    }
 }
