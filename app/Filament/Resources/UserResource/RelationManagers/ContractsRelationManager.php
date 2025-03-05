@@ -154,7 +154,8 @@ class ContractsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Tambah Kontrak'),
+                    ->label('Tambah Kontrak')
+                    ->createAnother(false),
             ])
             ->actions([
                 ActionGroup::make([

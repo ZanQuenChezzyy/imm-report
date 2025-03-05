@@ -15,7 +15,8 @@ class ManageCompanies extends ManageRecords
         return [
             Actions\CreateAction::make()
                 ->label('Tambah Perusahaan')
-                ->icon('heroicon-m-plus-circle'),
+                ->icon('heroicon-m-plus-circle')
+                ->createAnother(false),
         ];
     }
 }

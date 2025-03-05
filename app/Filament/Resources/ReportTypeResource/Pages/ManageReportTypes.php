@@ -15,7 +15,8 @@ class ManageReportTypes extends ManageRecords
         return [
             Actions\CreateAction::make()
                 ->label('Tambah Tipe')
-                ->icon('heroicon-m-plus-circle'),
+                ->icon('heroicon-m-plus-circle')
+                ->createAnother(false),
         ];
     }
 }
