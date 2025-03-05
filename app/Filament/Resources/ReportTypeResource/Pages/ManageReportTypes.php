@@ -9,7 +9,7 @@ use Filament\Resources\Pages\ManageRecords;
 class ManageReportTypes extends ManageRecords
 {
     protected static string $resource = ReportTypeResource::class;
-
+    protected static bool $canCreateAnother = false;
     protected function getHeaderActions(): array
     {
         return [
