@@ -22,6 +22,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -64,6 +66,11 @@ class AdminPanelProvider extends PanelProvider
                     ->emptyPanelBackgroundColor(Color::hex('#030712'))
                     ->emptyPanelBackgroundImageOpacity('60%')
                     ->emptyPanelBackgroundImageUrl(asset('img/auth/background-auth.jpg')),
+                FilamentBackgroundsPlugin::make()
+                    ->imageProvider(
+                        MyImages::make()
+                            ->directory('img/auth')
+                    ),
                 LightSwitchPlugin::make(),
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')

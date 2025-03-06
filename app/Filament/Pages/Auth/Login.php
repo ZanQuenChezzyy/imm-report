@@ -11,7 +11,7 @@ use Illuminate\Support\HtmlString;
 
 class Login extends BaseLogin
 {
-    use HasCustomLayout;
+    // use HasCustomLayout;
     public function form(Form $form): Form
     {
         return $form
