@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminReportChart extends ChartWidget
 {
-    protected static ?string $heading = 'Laporan Berdasarkan Status';
+    protected static ?string $heading = 'Grafik Status Laporan';
     public function getDescription(): ?string
     {
-        return 'Menampilkan jumlah laporan berdasarkan statusnya, Menunggu Persetujuan, Diterima, dan Ditolak.';
+        return 'Menampilkan Grafik jumlah laporan berdasarkan statusnya, Menunggu Persetujuan, Diterima, dan Ditolak.';
     }
     protected static ?int $sort = 3;
     protected function getData(): array
@@ -27,9 +27,9 @@ class AdminReportChart extends ChartWidget
                     'label' => 'Status Laporan',
                     'data' => [$inProgress, $completed, $denied],
                     'backgroundColor' => [
-                        'rgba(234, 179, 8, 0.7)',
-                        'rgba(34, 197, 94, 0.7)',
-                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(251, 146, 60, 0.5)',
+                        'rgba(34, 197, 94, 0.5)',
+                        'rgba(239, 68, 68, 0.5)',
                     ],
                     'borderRadius' => 5,
                     'borderWidth' => 0,

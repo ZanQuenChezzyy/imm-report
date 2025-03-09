@@ -29,9 +29,9 @@ class ContractorReportChart extends ChartWidget
                     'label' => 'Status Laporan',
                     'data' => [$waitingApproval, $approved, $rejected],
                     'backgroundColor' => [
-                        'rgba(234, 179, 8, 0.7)',  // Kuning untuk Menunggu Persetujuan
-                        'rgba(34, 197, 94, 0.7)',  // Hijau untuk Diterima
-                        'rgba(239, 68, 68, 0.7)',  // Merah untuk Ditolak
+                        'rgba(251, 146, 60, 0.5)',
+                        'rgba(34, 197, 94, 0.5)',
+                        'rgba(239, 68, 68, 0.5)',
                     ],
                     'borderRadius' => 5,
                     'borderWidth' => 0,
