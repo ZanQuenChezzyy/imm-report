@@ -41,7 +41,7 @@ class AdminStatsOverview extends BaseWidget
             Stat::make('Total Laporan', Report::count())
                 ->description('Jumlah laporan yang masuk')
                 ->descriptionIcon('heroicon-o-clipboard-document-list')
-                ->color('secondary'),
+                ->color('gray'),
 
             Stat::make('Permintaan Edit Laporan', ReportEditRequest::where('status', 0)->count())
                 ->description('Jumlah permintaan edit yang pending')
