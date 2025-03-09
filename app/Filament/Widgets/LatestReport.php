@@ -70,4 +70,9 @@ class LatestReport extends BaseWidget
 
         return Report::query()->where('user_id', $user->id); // Default untuk user biasa
     }
+
+    public static function canView(): bool
+    {
+        return Auth::user()->hasRole('Kontraktor');
+    }
 }
