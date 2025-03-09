@@ -106,46 +106,44 @@ class ReportResource extends Resource
                             ])
                             ->native(false)
                             ->preload()
-                            ->searchable()
-                            ->live()
-                            ->afterStateUpdated(
-                                fn($state, callable $get, callable $set) =>
-                                $set('period_end', match ($state) {
-                                    '0' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addDay()->toDateString() : null,
-                                    '1' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addWeek()->toDateString() : null,
-                                    '2' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonth()->toDateString() : null,
-                                    '3' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonths(3)->toDateString() : null,
-                                    '4' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonths(6)->toDateString() : null,
-                                    '5' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addYear()->toDateString() : null,
-                                    default => null,
-                                })
-                            ),
+                            // ->live()
+                            // ->afterStateUpdated(
+                            //     fn($state, callable $get, callable $set) =>
+                            //     $set('period_end', match ($state) {
+                            //         '0' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addDay()->toDateString() : null,
+                            //         '1' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addWeek()->toDateString() : null,
+                            //         '2' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonth()->toDateString() : null,
+                            //         '3' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonths(3)->toDateString() : null,
+                            //         '4' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addMonths(6)->toDateString() : null,
+                            //         '5' => $get('period_start') ? \Carbon\Carbon::parse($get('period_start'))->addYear()->toDateString() : null,
+                            //         default => null,
+                            //     })
+                            // )
+                            ->searchable(),
 
                         DatePicker::make('period_start')
                             ->label('Tanggal Mulai')
                             ->placeholder('Pilih Tanggal Mulai')
                             ->native(false)
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(
-                                fn($state, callable $get, callable $set) =>
-                                $set('period_end', match ($get('frequency')) {
-                                    '0' => $state ? \Carbon\Carbon::parse($state)->addDay()->toDateString() : null,
-                                    '1' => $state ? \Carbon\Carbon::parse($state)->addWeek()->toDateString() : null,
-                                    '2' => $state ? \Carbon\Carbon::parse($state)->addMonth()->toDateString() : null,
-                                    '3' => $state ? \Carbon\Carbon::parse($state)->addMonths(3)->toDateString() : null,
-                                    '4' => $state ? \Carbon\Carbon::parse($state)->addMonths(6)->toDateString() : null,
-                                    '5' => $state ? \Carbon\Carbon::parse($state)->addYear()->toDateString() : null,
-                                    default => null,
-                                })
-                            ),
+                            // ->live()
+                            // ->afterStateUpdated(
+                            //     fn($state, callable $get, callable $set) =>
+                            //     $set('period_end', match ($get('frequency')) {
+                            //         '0' => $state ? \Carbon\Carbon::parse($state)->addDay()->toDateString() : null,
+                            //         '1' => $state ? \Carbon\Carbon::parse($state)->addWeek()->toDateString() : null,
+                            //         '2' => $state ? \Carbon\Carbon::parse($state)->addMonth()->toDateString() : null,
+                            //         '3' => $state ? \Carbon\Carbon::parse($state)->addMonths(3)->toDateString() : null,
+                            //         '4' => $state ? \Carbon\Carbon::parse($state)->addMonths(6)->toDateString() : null,
+                            //         '5' => $state ? \Carbon\Carbon::parse($state)->addYear()->toDateString() : null,
+                            //         default => null,
+                            //     })
+                            // )
+                            ->required(),
 
                         DatePicker::make('period_end')
                             ->label('Tanggal Selesai')
-                            ->placeholder('Otomatis')
+                            ->placeholder('Pilih Tanggal Selesai')
                             ->native(false)
-                            ->disabled()
-                            ->dehydrated()
                             ->required(),
 
                         Textarea::make('description')
