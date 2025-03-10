@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('title', 45);
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('frequency')->length(1);
-            $table->string('file_path', 100);
             $table->date('period_start');
             $table->date('period_end');
             $table->unsignedTinyInteger('status')->default(0)->length(1);

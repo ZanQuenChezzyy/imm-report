@@ -18,7 +18,6 @@ return new class extends Migration {
             $table->string('name', 45);
             $table->date('period_start');
             $table->date('period_end');
-            $table->string('file', 150)->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

@@ -73,6 +73,14 @@ class UserRolePermissionSeeder extends Seeder
             'Delete Report',
             'Restore Report',
             'Force Delete Report',
+
+            'View Any Contract',
+            'View Contract',
+            'Create Contract',
+            'Update Contract',
+            'Delete Contract',
+            'Restore Contract',
+            'Force Delete Contract',
         ];
 
         // Create permissions

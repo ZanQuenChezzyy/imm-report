@@ -16,7 +16,6 @@ class Contract extends Model
         'name',
         'period_start',
         'period_end',
-        'file',
         'status',
     ];
 
@@ -35,4 +34,10 @@ class Contract extends Model
     {
         return $this->belongsToMany(\App\Models\User::class, 'user_contracts', 'contract_id', 'user_id');
     }
+
+    public function contractFiles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\ContractFile::class);
+    }
+
 }

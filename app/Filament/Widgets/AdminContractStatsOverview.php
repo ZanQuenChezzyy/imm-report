@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Contract;
+use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
@@ -11,20 +12,20 @@ class AdminContractStatsOverview extends BaseWidget
 {
     protected function getStats(): array
     {
-        $activeContracts = Contract::where('status', 1)->count();
+        $TotalContractor = User::role('Kontraktor')->count();
         $inactiveContracts = Contract::where('status', 0)->count();
         $expiringContracts = Contract::where('status', 1)
             ->whereBetween('period_end', [now(), now()->addMonths(6)])
             ->count();
 
         return [
-            Stat::make('Kontrak Aktif', $activeContracts)
-                ->description('Jumlah kontrak yang masih berjalan.')
-                ->descriptionIcon('heroicon-o-check-circle')
+            Stat::make('Total Kontraktor', $TotalContractor) // Menggunakan Spatie Role
+                ->description('Jumlah kontraktor terdaftar')
+                ->descriptionIcon('heroicon-o-user-group')
                 ->color('success'),
 
-            Stat::make('Kontrak Tidak Aktif', $inactiveContracts)
-                ->description('Jumlah kontrak yang Tidak Aktif.')
+            Stat::make('Kontrak Selesai', $inactiveContracts)
+                ->description('Jumlah kontrak yang Selesai.')
                 ->descriptionIcon('heroicon-o-x-circle')
                 ->color('danger'),
 

@@ -18,7 +18,6 @@ class Report extends Model
         'period_end',
         'description',
         'status',
-        'file_path',
     ];
 
     public function User(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -37,4 +36,10 @@ class Report extends Model
     {
         return $this->hasOne(\App\Models\ReportEditRequest::class, 'report_id', 'id');
     }
+
+    public function reportFiles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\ReportFile::class);
+    }
+
 }
