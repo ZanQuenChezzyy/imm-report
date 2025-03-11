@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Contract;
+use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,8 +23,15 @@ class AdminContractChart extends ChartWidget
 
     protected function getData(): array
     {
-        $activeContracts = Contract::where('status', 1)->count();
-        $inactiveContracts = Contract::where('status', 0)->count();
+        $tahun = $this->filters['tahun'] ?? date('Y');
+
+        $activeContracts = Contract::where('status', 1)
+            ->whereYear('period_end', $tahun)
+            ->count();
+
+        $inactiveContracts = Contract::where('status', 0)
+            ->whereYear('period_end', $tahun)
+            ->count();
 
         return [
             'datasets' => [
