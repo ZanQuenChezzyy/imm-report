@@ -39,5 +39,4 @@ class Contract extends Model
     {
         return $this->hasMany(\App\Models\ContractFile::class);
     }
-
 }

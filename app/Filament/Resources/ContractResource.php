@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ContractResource extends Resource
 {
     protected static ?string $model = Contract::class;
-    protected static ?string $label = 'Reminder';
+    protected static ?string $label = 'Status Kontrak';
     protected static ?string $navigationGroup = 'Kelola Pengguna';
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
     protected static ?string $activeNavigationIcon = 'heroicon-s-calendar-date-range';
@@ -40,7 +40,7 @@ class ContractResource extends Resource
         return static::getModel()::count() < 2 ? 'info' : 'danger';
     }
     protected static ?string $navigationBadgeTooltip = 'Total Kontrak Akan Habis';
-    protected static ?string $slug = 'reminder';
+    protected static ?string $slug = 'status-kontrak';
     public static function form(Form $form): Form
     {
         return $form
@@ -144,16 +144,10 @@ class ContractResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(
-                fn(Builder $query) =>
-                $query->where('status', 1) // Hanya kontrak aktif
-                    ->whereBetween('period_end', [now(), now()->addMonths(6)]) // Kontrak habis dalam 6 bulan
-                    ->orderBy('period_end', 'asc')
-            )
-            ->heading('Reminder Kontrak Yang Akan Habis')
-            ->description('Daftar kontrak yang akan berakhir dalam 6 bulan ke depan. Pastikan untuk melakukan perpanjangan atau tindak lanjut jika diperlukan.')
-            ->emptyStateHeading('Tidak Ada Kontrak yang Akan Habis')
-            ->emptyStateDescription('Saat ini tidak ada kontrak yang akan berakhir dalam 6 bulan ke depan.')
+            ->heading('Status Kontrak')
+            ->description('Pantau kontrak yang mendekati tanggal kedaluwarsa. Pastikan untuk memperpanjang atau mengambil tindakan yang diperlukan sebelum kontrak berakhir.')
+            ->emptyStateHeading('Tidak Ada Kontrak yang Kedaluwarsa')
+            ->emptyStateDescription('Saat ini semua kontrak masih berlaku dan tidak ada yang mendekati masa kedaluwarsa.')
             ->columns([
                 TextColumn::make('number')
                     ->label('Nomor'),
@@ -182,6 +176,12 @@ class ContractResource extends Resource
                     ->badge()
                     ->state(fn($record) => self::hitungSisaWaktu($record->period_end)) // Panggil fungsi statis
                     ->color(fn($record) => now()->diffInDays($record->period_end) <= 90 ? 'danger' : 'warning'),
+
+                TextColumn::make('status_kedaluwarsa')
+                    ->label('Status Kedaluwarsa')
+                    ->badge()
+                    ->state(fn($record) => now()->greaterThan($record->period_end) ? 'Sudah Kedaluwarsa' : 'Belum Kedaluwarsa')
+                    ->color(fn($record) => now()->greaterThan($record->period_end) ? 'danger' : 'success'),
             ])
             ->filters([
                 SelectFilter::make('period_end')
@@ -234,15 +234,19 @@ class ContractResource extends Resource
     private static function hitungSisaWaktu($periodEnd): string
     {
         $now = now();
-        $diff = $now->diff($periodEnd);
+        $diffInDays = $now->diffInDays($periodEnd, false); // Mengizinkan hasil negatif
 
-        $sisaBulan = $diff->m; // Ambil sisa bulan
-        $sisaHari = $diff->d; // Ambil sisa hari
+        if ($diffInDays < 0) {
+            return abs(floor($diffInDays)) . " Hari (melewati batas)";
+        }
+
+        $diff = $now->diff($periodEnd);
+        $sisaBulan = $diff->m;
+        $sisaHari = $diff->d;
 
         if ($sisaBulan == 0) {
             return "$sisaHari Hari";
         }
         return "$sisaBulan Bulan $sisaHari Hari";
     }
-
 }
