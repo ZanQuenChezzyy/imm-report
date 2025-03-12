@@ -42,7 +42,17 @@ class ReportResource extends Resource
     protected static ?int $navigationSort = 4;
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        $user = Auth::user();
+
+        if ($user->hasRole('Administrator')) {
+            return Report::count();
+        }
+
+        if ($user->hasRole('Kontraktor')) {
+            return Report::where('user_id', $user->id)->count();
+        }
+
+        return null;
     }
     public static function getNavigationBadgeColor(): ?string
     {

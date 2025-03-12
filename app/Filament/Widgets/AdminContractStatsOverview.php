@@ -5,12 +5,14 @@ namespace App\Filament\Widgets;
 use App\Models\Contract;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
 
 class AdminContractStatsOverview extends BaseWidget
 {
+    use InteractsWithPageFilters;
     protected function getStats(): array
     {
         $tahun = $this->filters['tahun'] ?? date('Y');

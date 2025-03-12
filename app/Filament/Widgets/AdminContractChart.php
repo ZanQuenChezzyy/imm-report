@@ -5,10 +5,12 @@ namespace App\Filament\Widgets;
 use App\Models\Contract;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Support\Facades\Auth;
 
 class AdminContractChart extends ChartWidget
 {
+    use InteractsWithPageFilters;
     protected static ?string $heading = 'Status Kontrak';
 
     protected int|string|array $columnSpan = 'full';

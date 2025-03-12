@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -78,9 +79,15 @@ class ReportTypeResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make()
+                        ->color('primary'),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+                    ->icon('heroicon-o-ellipsis-horizontal-circle')
+                    ->color('info')
+                    ->tooltip('Aksi')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -7,6 +7,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+use Illuminate\Support\Facades\Auth;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
@@ -29,7 +30,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->native(false)
                         ->default(date('Y'))
                         ->reactive(),
-                ])
+                ])->hidden(Auth::user()->hasRole('Kontraktor'))
         ]);
     }
 
