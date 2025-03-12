@@ -178,7 +178,7 @@ class ContractResource extends Resource
                     ->color(fn($record) => now()->diffInDays($record->period_end) <= 90 ? 'danger' : 'warning'),
 
                 TextColumn::make('status_kedaluwarsa')
-                    ->label('Status Kedaluwarsa')
+                    ->label('Status')
                     ->badge()
                     ->state(fn($record) => now()->greaterThan($record->period_end) ? 'Sudah Kedaluwarsa' : 'Belum Kedaluwarsa')
                     ->color(fn($record) => now()->greaterThan($record->period_end) ? 'danger' : 'success'),
@@ -202,7 +202,13 @@ class ContractResource extends Resource
                     })
                     ->native(false),
 
-
+                SelectFilter::make('company_id')
+                    ->label('Perusahaan')
+                    ->placeholder('Pilih Perusahaan')
+                    ->relationship('company', 'name')
+                    ->native(false)
+                    ->preload()
+                    ->searchable(),
             ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 ActionGroup::make([
