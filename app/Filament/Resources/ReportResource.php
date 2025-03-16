@@ -191,6 +191,7 @@ class ReportResource extends Resource
 
                 TextColumn::make('ReportType.name')
                     ->label('Tipe Laporan')
+                    ->searchable()
                     ->sortable(),
 
                 TextColumn::make('user.name')
@@ -244,11 +245,13 @@ class ReportResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
 
-                TextColumn::make('file_path')
+                TextColumn::make('reportFiles.file_path')
                     ->label('File Laporan')
-                    ->formatStateUsing(fn(string $state): string => pathinfo($state, PATHINFO_BASENAME))
+                    ->listWithLineBreaks()
+                    ->bulleted()
+                    ->limitList(3)
+                    ->expandableLimitedList()
                     ->limit(20)
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
